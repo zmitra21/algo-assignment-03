@@ -1,4 +1,5 @@
 # assignment-03
+# Zack Mitra
 
 # no other imports needed
 from collections import defaultdict
@@ -11,6 +12,7 @@ import math
 # return True or False
 def isearch(L, x):
     ###TODO
+    return iterate(lambda found, value: found or value == x, False, L)
     pass
 
 def iterate(f, x, a):
@@ -24,6 +26,7 @@ def iterate(f, x, a):
 # return True or False
 def rsearch(L, x):
     ###TODO
+    return reduce(lambda a, b: a or b, False, [value == x for value in L])
     pass
 
 def reduce(f, id_, a):
@@ -100,6 +103,13 @@ def dedup(a, b):
     [1,2,3,4,5]
     """
     ###TODO
+    if len(a) == 0:
+        return b
+    if len(b) == 0:
+        return a
+    if a[-1] == b[0]:
+        return a + b[1:]
+    return a + b
     pass
     
 def doc_index_reduce(group):
@@ -116,7 +126,8 @@ def doc_index_reduce(group):
     ('is', [0,1,2])
     """
     ### TODO fix this line
-    return (group[0], group[1])
+    docids = [[docid] for docid in group [1]]
+    return (group[0], reduce(dedup, [], docids))
 
 def collect(pairs):
     """
@@ -162,6 +173,8 @@ def parens_match_iterative(mylist):
     False
     """
     ### TODO
+    balance, valid = iterate(parens_update, (0, True), mylist)
+    return valid and balance == 0
     pass
 
 
@@ -178,6 +191,17 @@ def parens_update(current_output, next_input):
       the updated value of `current_output`
     """
     ###TODO
+    balance, valid = current_output
+
+    if next_input == '(':
+        balance += 1
+    elif next_input == ')':
+        balance -= 1
+
+    if balance < 0:
+        valid = False
+
+    return (balance, valid)
     pass
 
 #### Scan solution
@@ -200,6 +224,12 @@ def parens_match_scan(mylist):
     
     """
     ###TODO
+    mapped = list(map(paren_map, mylist))
+    prefix_sums, total = scan(plus, 0, mapped)
+
+    min_prefix = reduce(min_f, 0, prefix_sums)
+
+    return total == 0 and min_prefix >= 0
     pass
 
 def scan(f, id_, a):
@@ -268,5 +298,27 @@ def parens_match_dc_helper(mylist):
       parens_match_dc to return the final True or False value
     """
     ###TODO
+    if len(mylist) == 0:
+        return (0, 0)
+
+    if len(mylist) == 1:
+        if mylist[0] == '(':
+            return (0, 1)
+        elif mylist[0] == ')':
+            return (1, 0)
+        else:
+            return (0, 0)
+
+    mid = len(mylist) // 2
+
+    left_R, left_L = parens_match_dc_helper(mylist[:mid])
+    right_R, right_L = parens_match_dc_helper(mylist[mid:])
+
+    matches = min(left_L, right_R)
+
+    unmatched_R = left_R + right_R - matches
+    unmatched_L = left_L + right_L - matches
+
+    return (unmatched_R, unmatched_L)
     pass
     
